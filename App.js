@@ -1,18 +1,51 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Text, View, Button, StatusBar, TouchableOpacity, Dimensions } from 'react-native';
-import { vibrate } from './utils'
+import { StyleSheet, Text, View, StatusBar, TouchableOpacity } from 'react-native';
 
-const screen = Dimensions.get('window');
+const format = num => `0${num}`.slice(-2);
+
+const remaining = (time) => {
+    const min = Math.floor(time / 60);
+    const sec = time - min * 60;
+    return { min: format(min), sec: format(sec) };
+}
 
 export default function App() {
+  const [remainingsec, setRemainingsec] = useState(0);
+  const [isActive, setIsActive] = useState(false);
+  const { min, sec } = remaining(remainingsec);
+
+  toggle = () => {
+    setIsActive(!isActive);
+  }
+
+  reset = () => {
+    setRemainingsec(0);
+    setIsActive(false);
+  }
+
+  useEffect(() => {
+    let interval = null;
+    if (isActive) {
+      interval = setInterval(() => {
+        setRemainingsec(remainingsec => remainingsec + 1);
+      }, 1000);
+    } else if (!isActive && remainingsec !== 0) {
+      clearInterval(interval);
+    }
+    return () => clearInterval(interval);
+  }, [isActive, remainingsec]);
+
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle='light-content' />
-      <TouchableOpacity style={styles.button} onPress={() => null} >
-        <Text style={styles.buttonText}>Start</Text>
+      <StatusBar barStyle="light-content" />
+      <Text style={styles.timerText}>{`${min}:${sec}`}</Text>
+      <TouchableOpacity onPress={toggle} style={styles.button}>
+          <Text style={styles.buttonText}>{isActive ? 'Pause' : 'Start'}</Text>
       </TouchableOpacity>
-      <Text style={styles.timerText}>00:00</Text>
+      <TouchableOpacity onPress={reset} style={[styles.button, styles.buttonReset]}>
+          <Text style={[styles.buttonText, styles.buttonTextReset]}>Reset</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -25,109 +58,28 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   button: {
-    borderWidth: 5,
-    borderColor: 'green',
-    width: screen.width / 3,
-    height: screen.width / 3,
-    borderRadius: screen.width / 3,
-    alignItems: 'center',
-    justifyContent: 'center'
+      borderWidth: 1,
+      borderColor: 'blue',
+      borderRadius: 360,
+      width: '30%',
+      height: '18%',
+      alignItems: 'center',
+      justifyContent: 'center'
   },
   buttonText: {
-    fontSize: 45,
-    color: 'green'
+      fontSize: 35,
+      color: 'blue'
   },
   timerText: {
-    color: '#fff',
-    fontSize: 90,
-    marginBottom: 20
+      color: 'white',
+      fontSize: 90,
+      marginBottom: 20
+  },
+  buttonReset: {
+      marginTop: 30,
+      borderColor: "green"
+  },
+  buttonTextReset: {
+    color: "green"
   }
 });
-
-// import React, { useState, useEffect } from 'react';
-// import { StyleSheet, Text, View, StatusBar, TouchableOpacity, Dimensions } from 'react-native';
-
-// const screen = Dimensions.get('window');
-
-// const formatNumber = number => `0${number}`.slice(-2);
-
-// const getRemaining = (time) => {
-//     const mins = Math.floor(time / 60);
-//     const secs = time - mins * 60;
-//     return { mins: formatNumber(mins), secs: formatNumber(secs) };
-// }
-
-// export default function App() {
-//   const [remainingSecs, setRemainingSecs] = useState(0);
-//   const [isActive, setIsActive] = useState(false);
-//   const { mins, secs } = getRemaining(remainingSecs);
-
-//   toggle = () => {
-//     setIsActive(!isActive);
-//   }
-
-//   reset = () => {
-//     setRemainingSecs(0);
-//     setIsActive(false);
-//   }
-
-//   useEffect(() => {
-//     let interval = null;
-//     if (isActive) {
-//       interval = setInterval(() => {
-//         setRemainingSecs(remainingSecs => remainingSecs + 1);
-//       }, 1000);
-//     } else if (!isActive && remainingSecs !== 0) {
-//       clearInterval(interval);
-//     }
-//     return () => clearInterval(interval);
-//   }, [isActive, remainingSecs]);
-
-
-//   return (
-//     <View style={styles.container}>
-//       <StatusBar barStyle="light-content" />
-//       <Text style={styles.timerText}>{`${mins}:${secs}`}</Text>
-//       <TouchableOpacity onPress={toggle} style={styles.button}>
-//           <Text style={styles.buttonText}>{isActive ? 'Pause' : 'Start'}</Text>
-//       </TouchableOpacity>
-//       <TouchableOpacity onPress={reset} style={[styles.button, styles.buttonReset]}>
-//           <Text style={[styles.buttonText, styles.buttonTextReset]}>Reset</Text>
-//       </TouchableOpacity>
-//     </View>
-//   );
-// }
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     backgroundColor: '#07121B',
-//     alignItems: 'center',
-//     justifyContent: 'center',
-//   },
-//   button: {
-//       borderWidth: 10,
-//       borderColor: '#B9AAFF',
-//       width: screen.width / 2,
-//       height: screen.width / 2,
-//       borderRadius: screen.width / 2,
-//       alignItems: 'center',
-//       justifyContent: 'center'
-//   },
-//   buttonText: {
-//       fontSize: 45,
-//       color: '#B9AAFF'
-//   },
-//   timerText: {
-//       color: '#fff',
-//       fontSize: 90,
-//       marginBottom: 20
-//   },
-//   buttonReset: {
-//       marginTop: 20,
-//       borderColor: "#FF851B"
-//   },
-//   buttonTextReset: {
-//     color: "#FF851B"
-//   }
-// });
